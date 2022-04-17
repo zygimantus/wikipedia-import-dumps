@@ -1,12 +1,14 @@
-read WIKI_NAME
-DATE="20220401"
-DUMP_NAME="$WIKI_NAME-$DATE-pages-articles-multistream"
+read -p "Enter wiki name [en]: " WIKI_NAME
+WIKI_NAME=${WIKI_NAME:-en}
+read -p "Enter your name [20220401]: " WIKI_DATE
+WIKI_DATE=${WIKI_DATE:-20220401}
+DUMP_NAME="$WIKI_NAME-$WIKI_DATE-pages-articles-multistream"
 
 mkdir $DUMP_NAME
 cp import-sql-into-mysql.sh $DUMP_NAME
 cd $DUMP_NAME
 
-wget "https://dumps.wikimedia.org/$WIKI_NAME/$DATE/$DUMP_NAME.xml.bz2"
+wget "https://dumps.wikimedia.org/$WIKI_NAME/$WIKI_DATE/$DUMP_NAME.xml.bz2"
 
 # Download patched mwdumper version and pre/post import SQL scripts
 wget "https://github.com/pirate/wikipedia-mirror/raw/master/bin/mwdumper-1.26.jar"
@@ -18,7 +20,7 @@ pbzip2 -v -d -k -m10000 "$DUMP_NAME.xml.bz2"
 
 # Convert the XML file into a SQL file using mwdumper
 java -server \
-    -jar ./wikipedia-importing-tools/mwdumper-1.26.jar \
+    -jar ./mwdumper-1.26.jar \
     --format=sql:1.5 \
     "$DUMP_NAME.xml" \
 > wikipedia.sql
